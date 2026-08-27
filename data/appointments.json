@@ -1,0 +1,50 @@
+[
+  {
+    "patientName": "test",
+    "patientPhone": "72928929872",
+    "patientEmail": "test@gmail.com",
+    "patientAge": "20",
+    "patientGender": "Male",
+    "department": "General Physician & Internal Medicine",
+    "doctorId": "doc-anjuman-sayyad",
+    "preferredDate": "2026-08-28",
+    "preferredTime": "12:30 PM",
+    "message": "test",
+    "doctorName": "Dr. Anjuman Sayyad",
+    "id": "apt-1787833088193-758",
+    "status": "Pending",
+    "createdAt": "2026-08-27T12:18:08.193Z"
+  },
+  {
+    "id": "apt-101",
+    "patientName": "Sunita Devi",
+    "patientPhone": "9829123456",
+    "patientEmail": "sunita@example.com",
+    "patientAge": "28",
+    "patientGender": "Female",
+    "department": "Obstetrics & Gynaecology (Obs & Gynae)",
+    "doctorId": "doc-anjuman-sayyad",
+    "doctorName": "Dr. Anjuman Sayyad",
+    "preferredDate": "2026-08-28",
+    "preferredTime": "11:00 AM",
+    "message": "Routine antenatal checkup for 6th month pregnancy and sonography review.",
+    "status": "Confirmed",
+    "createdAt": "2026-08-27T10:30:00.000Z"
+  },
+  {
+    "id": "apt-102",
+    "patientName": "Ramesh Kumar Sharma",
+    "patientPhone": "9414567890",
+    "patientEmail": "",
+    "patientAge": "52",
+    "patientGender": "Male",
+    "department": "General Physician & Internal Medicine",
+    "doctorId": "doc-general-physician",
+    "doctorName": "Dr. M. K. Sharma",
+    "preferredDate": "2026-08-28",
+    "preferredTime": "05:30 PM",
+    "message": "High blood sugar and routine hypertension medicine follow-up.",
+    "status": "Pending",
+    "createdAt": "2026-08-27T11:15:00.000Z"
+  }
+]
