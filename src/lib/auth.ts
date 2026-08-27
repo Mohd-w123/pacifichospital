@@ -1,6 +1,8 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { cookies } from 'next/headers';
+import { connectToDatabase } from './mongodb';
+import { AdminAuthModel } from './models';
 
 const AUTH_FILE_PATH = path.join(process.cwd(), 'data', 'admin-auth.json');
 export const AUTH_COOKIE_NAME = 'pacific_hospital_admin_session';
@@ -15,23 +17,73 @@ export interface AdminUser {
 
 export async function getAdminCredentials(): Promise<AdminUser> {
   try {
-    const data = await fs.readFile(AUTH_FILE_PATH, 'utf-8');
-    return JSON.parse(data) as AdminUser;
-  } catch (error) {
-    const defaultCreds: AdminUser = {
-      email: 'admin@gmail.com',
-      password: 'Admin@123',
-      name: 'Pacific Care Administrator',
-      role: 'Super Admin',
-      lastUpdated: new Date().toISOString()
+    await connectToDatabase();
+    let admin = await AdminAuthModel.findOne({}).lean();
+
+    if (!admin) {
+      // Seed default credentials to MongoDB
+      console.log('🌱 Seeding initial admin auth credentials to MongoDB Atlas...');
+      let seedCreds: AdminUser = {
+        email: 'admin@gmail.com',
+        password: 'Admin@123',
+        name: 'Pacific Care Administrator',
+        role: 'Super Admin',
+        lastUpdated: new Date().toISOString()
+      };
+
+      try {
+        const raw = await fs.readFile(AUTH_FILE_PATH, 'utf-8');
+        seedCreds = JSON.parse(raw);
+      } catch (e) {}
+
+      admin = await AdminAuthModel.create(seedCreds);
+    }
+
+    return {
+      email: admin.email,
+      password: admin.password,
+      name: admin.name,
+      role: admin.role,
+      lastUpdated: admin.lastUpdated
     };
-    await fs.writeFile(AUTH_FILE_PATH, JSON.stringify(defaultCreds, null, 2), 'utf-8');
-    return defaultCreds;
+  } catch (error) {
+    console.error('⚠️ MongoDB getAdminCredentials fallback to local file:', error);
+    try {
+      const data = await fs.readFile(AUTH_FILE_PATH, 'utf-8');
+      return JSON.parse(data) as AdminUser;
+    } catch (e) {
+      return {
+        email: 'admin@gmail.com',
+        password: 'Admin@123',
+        name: 'Pacific Care Administrator',
+        role: 'Super Admin',
+        lastUpdated: new Date().toISOString()
+      };
+    }
   }
 }
 
 export async function saveAdminCredentials(creds: AdminUser): Promise<void> {
-  await fs.writeFile(AUTH_FILE_PATH, JSON.stringify(creds, null, 2), 'utf-8');
+  try {
+    await connectToDatabase();
+    await AdminAuthModel.findOneAndUpdate(
+      {},
+      {
+        email: creds.email.toLowerCase().trim(),
+        password: creds.password,
+        name: creds.name,
+        role: creds.role || 'Super Admin',
+        lastUpdated: new Date().toISOString()
+      },
+      { upsert: true, new: true }
+    );
+
+    // Keep local backup JSON synchronized
+    await fs.writeFile(AUTH_FILE_PATH, JSON.stringify(creds, null, 2), 'utf-8');
+  } catch (error) {
+    console.error('⚠️ Error saving admin credentials to MongoDB:', error);
+    await fs.writeFile(AUTH_FILE_PATH, JSON.stringify(creds, null, 2), 'utf-8');
+  }
 }
 
 export async function isAuthenticated(): Promise<boolean> {

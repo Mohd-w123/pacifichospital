@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Stethoscope, Plus, Edit2, Trash2, X, Save, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
 import { ServiceItem } from '@/lib/types';
 import RichTextEditor from '@/components/admin/RichTextEditor';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 export default function AdminServices() {
   const [services, setServices] = useState<ServiceItem[]>([]);
@@ -284,13 +285,11 @@ export default function AdminServices() {
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Image URL</label>
-                <input
-                  type="text"
+                <ImageUploader
                   value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  placeholder="Image link or /images/..."
-                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                  onChange={(url) => setFormData({ ...formData, imageUrl: url })}
+                  label="Service Featured Image (Cloudinary - pacific-hms)"
+                  folder="pacific-hms/services"
                 />
               </div>
 

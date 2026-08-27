@@ -23,6 +23,7 @@ import {
   Globe
 } from 'lucide-react';
 import { SiteContent, HospitalInfo, NavItem, SubNavItem } from '@/lib/types';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 export default function AdminHospitalInfo() {
   const [content, setContent] = useState<SiteContent | null>(null);
@@ -206,13 +207,11 @@ export default function AdminHospitalInfo() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Header Logo */}
             <div className="space-y-3 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">Header Logo URL</label>
-              <input
-                type="text"
+              <ImageUploader
                 value={hospital.logoUrl || ''}
-                onChange={(e) => setHospital({ ...hospital, logoUrl: e.target.value })}
-                placeholder="/images/logo.png or https://..."
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                onChange={(url) => setHospital({ ...hospital, logoUrl: url })}
+                label="Header Logo (Cloudinary - pacific-hms/branding)"
+                folder="pacific-hms/branding"
               />
               <div className="pt-2">
                 <span className="text-[11px] text-slate-400 block mb-1">Live Header Preview:</span>
@@ -228,13 +227,11 @@ export default function AdminHospitalInfo() {
 
             {/* Footer Logo */}
             <div className="space-y-3 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">Footer Logo URL (Optional)</label>
-              <input
-                type="text"
+              <ImageUploader
                 value={hospital.footerLogoUrl || hospital.logoUrl || ''}
-                onChange={(e) => setHospital({ ...hospital, footerLogoUrl: e.target.value })}
-                placeholder="/images/logo.png or https://..."
-                className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                onChange={(url) => setHospital({ ...hospital, footerLogoUrl: url })}
+                label="Footer Logo (Cloudinary - pacific-hms/branding)"
+                folder="pacific-hms/branding"
               />
               <div className="pt-2">
                 <span className="text-[11px] text-slate-400 block mb-1">Live Footer Preview:</span>

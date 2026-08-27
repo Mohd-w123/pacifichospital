@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Users, Plus, Edit2, Trash2, X, Save, CheckCircle2, AlertCircle, Clock, Stethoscope, Award } from 'lucide-react';
 import { Doctor } from '@/lib/types';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 export default function AdminDoctors() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -316,13 +317,11 @@ export default function AdminDoctors() {
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Doctor Photo URL</label>
-                <input
-                  type="text"
+                <ImageUploader
                   value={formData.photoUrl}
-                  onChange={(e) => setFormData({ ...formData, photoUrl: e.target.value })}
-                  placeholder="Image link or /images/..."
-                  className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                  onChange={(url) => setFormData({ ...formData, photoUrl: url })}
+                  label="Doctor Photo (Upload to Cloudinary - pacific-hms)"
+                  folder="pacific-hms/doctors"
                 />
               </div>
 
