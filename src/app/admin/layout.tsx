@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Building2,
@@ -15,7 +15,9 @@ import {
   Menu,
   X,
   ShieldCheck,
-  Bell
+  LogOut,
+  KeyRound,
+  UserCheck
 } from 'lucide-react';
 
 export default function AdminLayout({
@@ -24,7 +26,63 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [adminUser, setAdminUser] = useState<any>(null);
   const pathname = usePathname();
+  const router = useRouter();
+
+  // If on login page, render children directly without admin chrome
+  const isLoginPage = pathname === '/admin/login';
+
+  useEffect(() => {
+    if (isLoginPage) {
+      setAuthChecked(true);
+      return;
+    }
+
+    // Verify session
+    fetch('/api/admin/me')
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Not authenticated');
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data.authenticated) {
+          setAdminUser(data.user);
+          setAuthChecked(true);
+        } else {
+          router.push('/admin/login');
+        }
+      })
+      .catch(() => {
+        router.push('/admin/login');
+      });
+  }, [pathname, isLoginPage, router]);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' });
+      router.push('/admin/login');
+      router.refresh();
+    } catch (e) {
+      router.push('/admin/login');
+    }
+  };
+
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
+
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center space-y-4">
+        <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs font-semibold text-slate-400">Verifying Admin Authentication...</p>
+      </div>
+    );
+  }
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -33,7 +91,8 @@ export default function AdminLayout({
     { name: 'Services & Specialties', href: '/admin/services', icon: Stethoscope },
     { name: 'Hospital Photos & Gallery', href: '/admin/gallery', icon: ImageIcon },
     { name: 'Custom Pages & CMS', href: '/admin/pages', icon: FileText },
-    { name: 'Hospital Info & Contacts', href: '/admin/hospital-info', icon: Building2 },
+    { name: 'Hospital Info & Menus', href: '/admin/hospital-info', icon: Building2 },
+    { name: 'Admin Security & Password', href: '/admin/profile', icon: KeyRound },
   ];
 
   return (
@@ -47,7 +106,7 @@ export default function AdminLayout({
           </div>
           <div>
             <h1 className="font-bold text-sm text-white leading-tight">Pacific Care Admin</h1>
-            <p className="text-[10px] text-teal-400">Content Management</p>
+            <p className="text-[10px] text-teal-400">{adminUser?.email || 'admin@gmail.com'}</p>
           </div>
         </div>
 
@@ -62,7 +121,7 @@ export default function AdminLayout({
           </Link>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
+            className="p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white cursor-pointer"
           >
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -75,7 +134,7 @@ export default function AdminLayout({
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="p-5 space-y-6">
+        <div className="p-5 space-y-6 overflow-y-auto">
           {/* Logo & Hospital Header */}
           <div className="flex items-center gap-3 border-b border-slate-800 pb-5">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-teal-700 flex items-center justify-center shadow-lg shadow-teal-500/20 text-white font-black text-lg">
@@ -111,18 +170,27 @@ export default function AdminLayout({
           </nav>
         </div>
 
-        {/* Sidebar Footer: View Live Website */}
-        <div className="p-4 border-t border-slate-800 space-y-3 bg-slate-950/80">
+        {/* Sidebar Footer: View Live Website & Logout */}
+        <div className="p-4 border-t border-slate-800 space-y-2 bg-slate-950/80">
           <Link
             href="/"
             target="_blank"
-            className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 font-semibold py-2.5 px-4 rounded-xl text-xs transition"
+            className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 font-semibold py-2 px-3 rounded-xl text-xs transition"
           >
             <span>View Public Website</span>
             <ExternalLink className="w-3.5 h-3.5 text-teal-400" />
           </Link>
-          <p className="text-[11px] text-slate-500 text-center">
-            Logged in as Admin • Pacific Care Hospital
+
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-900/60 font-semibold py-2 px-3 rounded-xl text-xs transition cursor-pointer"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Logout Session</span>
+          </button>
+
+          <p className="text-[10px] text-slate-500 text-center truncate pt-1">
+            {adminUser?.email || 'admin@gmail.com'}
           </p>
         </div>
       </aside>
