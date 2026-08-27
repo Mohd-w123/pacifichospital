@@ -36,7 +36,11 @@ export async function getAdminCredentials(): Promise<AdminUser> {
         seedCreds = JSON.parse(raw);
       } catch (e) {}
 
-      admin = await AdminAuthModel.create(seedCreds);
+      admin = await AdminAuthModel.findOneAndUpdate(
+        { email: seedCreds.email.toLowerCase().trim() },
+        { ...seedCreds },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      ).lean();
     }
 
     return {

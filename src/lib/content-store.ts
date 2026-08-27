@@ -34,10 +34,11 @@ export async function getSiteContent(): Promise<SiteContent> {
       // Auto-seed from JSON file into MongoDB
       console.log('🌱 Seeding initial site content to MongoDB Atlas (pacific-hms)...');
       const seedData = await getSeedContent();
-      record = await SiteContentModel.create({
-        key: 'main_content',
-        ...seedData
-      });
+      record = await SiteContentModel.findOneAndUpdate(
+        { key: 'main_content' },
+        { key: 'main_content', ...seedData },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      ).lean();
     }
 
     return {
